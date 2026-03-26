@@ -1,54 +1,32 @@
 package com.asif.flowsenseai.ui.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.asif.flowsenseai.data.local.AppDatabase
-import com.asif.flowsenseai.data.local.ExpenseDao
 import com.asif.flowsenseai.domain.model.Expense
 import com.asif.flowsenseai.domain.repository.ExpenseRepository
-import com.asif.flowsenseai.domain.repository.ExpenseRepositoryImpl
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-/**
- * AndroidViewModel for managing expense data.
- * Extends AndroidViewModel to get Application context for database access.
- * This ViewModel survives configuration changes and provides data to the UI.
- */
-class ExpenseViewModel(application: Application) : AndroidViewModel(application) {
-    
-    // Initialize database and DAO
-    private val database: AppDatabase = AppDatabase.getDatabase(application)
-    private val expenseDao: ExpenseDao = database.expenseDao()
-    
-    // Initialize repository with DAO (constructor injection)
-    private val repository: ExpenseRepository = ExpenseRepositoryImpl(expenseDao)
-    
-    // Private MutableStateFlow to hold the list of expenses
+@HiltViewModel
+class ExpenseViewModel @Inject constructor(
+    private val repository: ExpenseRepository
+) : ViewModel() {
+
     private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
-    
-    // Public immutable StateFlow that UI can observe
     val expenses: StateFlow<List<Expense>> = _expenses.asStateFlow()
-    
-    // Private MutableStateFlow to hold total spent amount
-    private val _totalSpent = MutableStateFlow<Double>(0.0)
-    
-    // Public immutable StateFlow for total spent
+
+    private val _totalSpent = MutableStateFlow(0.0)
     val totalSpent: StateFlow<Double> = _totalSpent.asStateFlow()
-    
+
     init {
-        // Load expenses when ViewModel is created
         loadExpenses()
         loadTotalSpent()
     }
-    
-    /**
-     * Load all expenses from the repository.
-     * Uses viewModelScope to automatically cancel coroutines when ViewModel is cleared.
-     */
+
     private fun loadExpenses() {
         viewModelScope.launch {
             repository.getAllExpenses().collect { expenseList ->
@@ -56,10 +34,7 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-    
-    /**
-     * Load total spent amount from the repository.
-     */
+
     private fun loadTotalSpent() {
         viewModelScope.launch {
             repository.getTotalSpent().collect { total ->
@@ -67,12 +42,7 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
             }
         }
     }
-    
-    /**
-     * Add a dummy expense (₹250 to Zomato - Food category).
-     * This will be called when user clicks the FAB button.
-     * Creates a realistic expense with current timestamp.
-     */
+
     fun addDummyExpense() {
         viewModelScope.launch {
             val dummyExpense = Expense(
@@ -85,33 +55,14 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
             repository.addExpense(dummyExpense)
         }
     }
-    
-    /**
-     * Add a new expense to the database.
-     * @param expense The expense to add
-     */
+
     fun addExpense(expense: Expense) {
-        viewModelScope.launch {
-            repository.addExpense(expense)
-        }
+        viewModelScope.launch { repository.addExpense(expense) }
     }
-    
-    /**
-     * Delete an expense from the database.
-     * @param expense The expense to delete
-     */
+
     fun deleteExpense(expense: Expense) {
-        viewModelScope.launch {
-            repository.deleteExpense(expense)
-        }
+        viewModelScope.launch { repository.deleteExpense(expense) }
     }
-    
-    /**
-     * Get formatted amount string with currency symbol.
-     * @param amount The amount to format
-     * @return Formatted amount string (e.g., "₹250.00")
-     */
-    fun getFormattedAmount(amount: Double): String {
-        return String.format("₹%.2f", amount)
-    }
+
+    fun getFormattedAmount(amount: Double): String = "₹%.2f".format(amount)
 }

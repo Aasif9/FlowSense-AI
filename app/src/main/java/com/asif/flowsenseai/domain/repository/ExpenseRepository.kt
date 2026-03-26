@@ -50,6 +50,10 @@ interface ExpenseRepository {
      * This will be used to save automatically parsed transactions.
      */
     suspend fun insertFromNotification(parsed: ParsedUpiTransaction)
+
+//    suspend fun post()
+//
+//    suspend fun  insetTemp()
 }
 
 /**

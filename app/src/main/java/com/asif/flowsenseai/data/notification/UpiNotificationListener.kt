@@ -3,176 +3,107 @@ package com.asif.flowsenseai.data.notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
+import com.asif.flowsenseai.domain.repository.ExpenseRepository
+import com.asif.flowsenseai.util.UpiParser
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
- * Notification Listener Service for detecting UPI payment notifications.
- * This service runs in the background and listens to all notifications.
- * We filter for UPI apps like Google Pay, PhonePe, and Paytm.
+ * Listens to all notifications and captures any that look like UPI/bank payments.
+ * Instead of filtering by package name (which breaks bank SMS), we filter by
+ * notification CONTENT — if it has a rupee amount + payment keywords, we save it.
  */
+@AndroidEntryPoint
 class UpiNotificationListener : NotificationListenerService() {
-    
+
     companion object {
         private const val TAG = "UpiNotificationListener"
-        
-        // Package names of popular UPI apps in India
-        private val UPI_APPS = setOf(
-            "com.google.android.apps.nbu.paisa.user", // Google Pay
-            "com.phonepe.app",                       // PhonePe
-            "net.one97.paytm",                       // Paytm
-            "com.amazon.mShop.android.shopping",     // Amazon Pay (UPI)
-            "in.org.npci.upiapp",                    // BHIM UPI
-            "com.csam.cbss.paytm",                   // Paytm Payments Bank
-            "com.yono"                               // YONO SBI
+
+        // Apps whose notifications we should IGNORE entirely (non-financial noise)
+        private val IGNORED_PACKAGES = setOf(
+            "com.whatsapp",
+            "com.instagram.android",
+            "com.facebook.katana",
+            "com.twitter.android",
+            "com.google.android.youtube",
+            "com.netflix.mediaclient"
         )
     }
-    
-    /**
-     * Called when a new notification is posted.
-     * This is where we'll detect UPI payment notifications.
-     */
-    override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        super.onNotificationPosted(sbn)
-        
-        sbn?.let { notification ->
-            val packageName = notification.packageName
-            val extras = notification.notification.extras
-            
-            // Get the notification text/title
-            val title = extras.getCharSequence("android.title")?.toString() ?: ""
-            val text = extras.getCharSequence("android.text")?.toString() ?: ""
-            val bigText = extras.getCharSequence("android.bigText")?.toString() ?: ""
-            
-            // DEBUG: Log ALL notifications to see what we're getting
-            Log.i(TAG, "=== NOTIFICATION RECEIVED ===")
-            Log.i(TAG, "Package: $packageName")
-            Log.i(TAG, "Title: $title")
-            Log.i(TAG, "Text: $text")
-            Log.i(TAG, "BigText: $bigText")
-            
-            // Check if this is from PhonePe specifically (for debugging)
-            if (packageName.contains("phonepe", ignoreCase = true)) {
-                Log.w(TAG, "📱 PHONEPE NOTIFICATION DETECTED!")
-                Log.w(TAG, "Package: $packageName")
-                Log.w(TAG, "Title: $title")
-                Log.w(TAG, "Text: $text")
-                Log.w(TAG, "BigText: $bigText")
-            }
-            
-            // Check if this is from a UPI app
-            if (UPI_APPS.contains(packageName)) {
-                Log.w(TAG, "🎯 UPI Notification detected!")
-                Log.w(TAG, "Package: $packageName")
-                Log.w(TAG, "Title: $title")
-                Log.w(TAG, "Text: $text")
-                Log.w(TAG, "BigText: $bigText")
-                
-                // Parse UPI notification details
-                parseUpiNotification(packageName, title, text, bigText)
-            } else {
-                Log.d(TAG, "Non-UPI notification ignored")
-            }
-            Log.i(TAG, "=== END NOTIFICATION ===")
-        }
-    }
-    
-    /**
-     * Called when a notification is removed.
-     * We don't need to handle this for now, but it's good to know.
-     */
-    override fun onNotificationRemoved(sbn: StatusBarNotification?) {
-        super.onNotificationRemoved(sbn)
-        Log.d(TAG, "Notification removed")
-    }
-    
-    /**
-     * Parse UPI notification details.
-     * This is where we'll extract amount, merchant, and other details.
-     * For now, we'll just log what we find.
-     */
-    private fun parseUpiNotification(packageName: String, title: String, text: String, bigText: String) {
-        Log.d(TAG, "=== Parsing UPI Notification ===")
-        Log.d(TAG, "App: ${getAppName(packageName)}")
-        Log.d(TAG, "Title: $title")
-        Log.d(TAG, "Text: $text")
-        Log.d(TAG, "BigText: $bigText")
-        
-        // Combine all text to search for transaction details
-        val fullText = "$title $text $bigText"
-        
-        // Parse amount (Rs.1.00, ₹250, etc.)
-        val amountPattern = Regex("(?:Rs\\.?|₹)\\s*([\\d,]+\\.?\\d*)")
-        val amountMatch = amountPattern.find(fullText)
-        val amount = amountMatch?.groupValues?.get(1)?.replace(",", "") ?: "0.00"
-        
-        // Parse transaction type (Debit/Credit)
-        val isDebit = fullText.contains("debited", ignoreCase = true) || 
-                     fullText.contains("Dr.", ignoreCase = true) ||
-                     fullText.contains("sent", ignoreCase = true)
-        
-        // Parse account number (A/C XXXXXX9234)
-        val accountPattern = Regex("A/C\\s+([A-Z0-9]+)")
-        val accountMatch = accountPattern.find(fullText)
-        val accountNumber = accountMatch?.groupValues?.get(1) ?: ""
-        
-        // Parse reference number (Ref:979519041132)
-        val refPattern = Regex("(?:Ref|Reference)\\s*:?\\s*([A-Z0-9]+)")
-        val refMatch = refPattern.find(fullText)
-        val referenceNumber = refMatch?.groupValues?.get(1) ?: ""
-        
-        // Parse available balance (AvlBal:Rs825.98)
-        val balancePattern = Regex("(?:AvlBal|Balance)\\s*:?\\s*(?:Rs\\.?|₹)\\s*([\\d,]+\\.?\\d*)")
-        val balanceMatch = balancePattern.find(fullText)
-        val availableBalance = balanceMatch?.groupValues?.get(1)?.replace(",", "") ?: "0.00"
-        
-        // Parse recipient/VPA (8240835756-2@ybl)
-        val vpaPattern = Regex("([\\d]+-[\\d]+@[a-z]+)")
-        val vpaMatch = vpaPattern.find(fullText)
-        val recipientVpa = vpaMatch?.groupValues?.get(1) ?: ""
-        
-        Log.i(TAG, "🔍 PARSED TRANSACTION DETAILS:")
-        Log.i(TAG, "Amount: ₹$amount")
-        Log.i(TAG, "Type: ${if (isDebit) "DEBIT" else "CREDIT"}")
-        Log.i(TAG, "Account: $accountNumber")
-        Log.i(TAG, "Reference: $referenceNumber")
-        Log.i(TAG, "Available Balance: ₹$availableBalance")
-        Log.i(TAG, "Recipient VPA: $recipientVpa")
-        
-        // TODO: Create Expense object and save to database
-        // TODO: Update UI to show new transaction
-        
-        Log.d(TAG, "=== End Parsing ===")
-    }
-    
-    /**
-     * Get user-friendly app name from package name.
-     */
-    private fun getAppName(packageName: String): String {
-        return when (packageName) {
-            "com.google.android.apps.nbu.paisa.user" -> "Google Pay"
-            "com.phonepe.app" -> "PhonePe"
-            "net.one97.paytm" -> "Paytm"
-            "com.amazon.mShop.android.shopping" -> "Amazon Pay"
-            "in.org.npci.upiapp" -> "BHIM UPI"
-            "com.csam.cbss.paytm" -> "Paytm Payments Bank"
-            "com.yono" -> "YONO SBI"
-            else -> "Unknown App"
-        }
-    }
-    
-    /**
-     * Called when the listener is connected to the notification manager.
-     */
+
+    // Hilt injection — this is why we needed @AndroidEntryPoint
+    @Inject
+    lateinit var repository: ExpenseRepository
+
+    // Coroutine scope tied to the service lifecycle
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     override fun onListenerConnected() {
         super.onListenerConnected()
-        Log.i(TAG, "🔔 Notification Listener Connected!")
-        Log.i(TAG, "FlowSense AI is now listening for UPI notifications...")
+        Log.i(TAG, "✅ Notification Listener connected — watching for UPI payments")
     }
-    
-    /**
-     * Called when the listener is disconnected from the notification manager.
-     */
+
     override fun onListenerDisconnected() {
         super.onListenerDisconnected()
-        Log.w(TAG, "⚠️ Notification Listener Disconnected!")
+        Log.w(TAG, "⚠️ Notification Listener disconnected")
+    }
+
+    override fun onNotificationPosted(sbn: StatusBarNotification?) {
+        super.onNotificationPosted(sbn)
+        sbn ?: return
+
+        val packageName = sbn.packageName ?: return
+
+        // Skip noise apps immediately
+        if (IGNORED_PACKAGES.contains(packageName)) return
+
+        val extras = sbn.notification?.extras ?: return
+        val title = extras.getCharSequence("android.title")?.toString() ?: ""
+        val text = extras.getCharSequence("android.text")?.toString() ?: ""
+        val bigText = extras.getCharSequence("android.bigText")?.toString() ?: ""
+
+        // Use bigText if available (more complete), else fall back to text
+        val body = bigText.ifBlank { text }
+
+        Log.d(TAG, "--- Notification from $packageName ---")
+        Log.d(TAG, "Title: $title | Body: $body")
+
+        // Safety check for Hilt injection
+        if (!::repository.isInitialized) {
+            Log.w(TAG, "Repository not ready yet, skipping notification")
+            return
+        }
+
+        // Hand off to unified parser — content-based detection, not package-based
+        val parsed = UpiParser.parse(title, body)
+
+        if (parsed != null) {
+            saveToDatabase(parsed, packageName)
+        } else {
+            Log.d(TAG, "Not a payment notification from $packageName, skipping.")
+        }
+    }
+
+    override fun onNotificationRemoved(sbn: StatusBarNotification?) {
+        // Not needed
+    }
+
+    /**
+     * Saves the parsed transaction to the Room database via repository.
+     * Runs on IO dispatcher — never blocks the main thread.
+     */
+    private fun saveToDatabase(parsed: ParsedUpiTransaction, source: String) {
+        serviceScope.launch {
+            try {
+                Log.i(TAG, "💾 Saving: ₹${parsed.amount} to ${parsed.merchant} (source: $source)")
+                repository.insertFromNotification(parsed)
+                Log.i(TAG, "✅ Saved successfully!")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Failed to save transaction: ${e.message}", e)
+            }
+        }
     }
 }

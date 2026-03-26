@@ -13,6 +13,8 @@ data class ParsedUpiTransaction(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+
+
 /**
  * Extension function to convert ParsedUpiTransaction to Expense domain model.
  * Uses the existing mapping style from the codebase.

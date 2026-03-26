@@ -27,6 +27,8 @@ import com.asif.flowsenseai.util.DateUtils
 import com.asif.flowsenseai.util.NotificationUtils
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 /**
  * Main screen of the FlowSense AI expense tracker app.
@@ -35,10 +37,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    viewModel: ExpenseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
-            .getInstance(LocalContext.current.applicationContext as android.app.Application)
-    ),
+    viewModel: ExpenseViewModel = hiltViewModel(),
     onNavigateToPermission: () -> Unit = {}
 ) {
     val context = LocalContext.current
