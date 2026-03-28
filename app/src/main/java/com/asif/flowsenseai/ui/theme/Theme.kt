@@ -33,6 +33,26 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+private val FlowSenseLightColors = lightColorScheme(
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnPrimaryContainer,
+    secondary = Secondary,
+    onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
+    onSecondaryContainer = OnSecondaryContainer,
+    tertiary = Tertiary,
+    surface = Surface,
+    onSurface = OnSurface,
+    surfaceVariant = SurfaceContainerLow,
+    outline = OutlineVariant,
+    error = Error,
+    onError = OnError,
+    background = Surface,
+    onBackground = OnSurface
+)
+
 @Composable
 fun FlowSenseAITheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -47,12 +67,12 @@ fun FlowSenseAITheme(
         }
 
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> FlowSenseLightColors
     }
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = FlowSenseTypography,
         content = content
     )
 }
