@@ -13,7 +13,8 @@ data class Expense(
     val merchant: String, // Where the expense was made
     val category: String, // Category of expense
     val date: Long, // Timestamp when expense was made
-    val type: String = "debit" // Type of transaction
+    val type: String = "debit", // Type of transaction
+    val notes: String? = null
 )
 
 /**
@@ -27,10 +28,10 @@ fun ExpenseEntity.toExpense(): Expense {
         merchant = this.merchant,
         category = this.category,
         date = this.date,
-        type = this.type
+        type = this.type, // Added missing comma here
+        notes = this.notes
     )
 }
-
 /**
  * Extension function to convert Expense (domain model) to ExpenseEntity.
  * This is useful when we want to save data from the UI to the database.
@@ -42,6 +43,7 @@ fun Expense.toExpenseEntity(): ExpenseEntity {
         merchant = this.merchant,
         category = this.category,
         date = this.date,
-        type = this.type
+        type = this.type,
+        notes = this.notes // Added this to ensure notes are saved to the DB
     )
 }

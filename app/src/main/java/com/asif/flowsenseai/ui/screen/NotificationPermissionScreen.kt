@@ -15,10 +15,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.compose.ui.platform.LocalLifecycleOwner
+
+import com.asif.flowsenseai.util.NotificationUtils
 
 /**
  * Screen to request notification listener permission from the user.
@@ -27,9 +33,42 @@ import androidx.compose.ui.unit.sp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationPermissionScreen(
+    onPermissionGranted: () -> Unit = {},
     onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    
+    // Check if permission is already granted
+    var isPermissionGranted by remember {
+        mutableStateOf(NotificationUtils.isNotificationListenerEnabled(context))
+    }
+    
+    // If permission is already granted, navigate to dashboard
+    LaunchedEffect(isPermissionGranted) {
+        if (isPermissionGranted) {
+            onPermissionGranted()
+        }
+    }
+
+    // Check permission when app resumes (user returns from settings)
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = object : DefaultLifecycleObserver {
+            override fun onResume(owner: LifecycleOwner) {
+                if (NotificationUtils.isNotificationListenerEnabled(context)) {
+                    isPermissionGranted = true
+                }
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        // This ensures the observer is removed when the Composable is destroyed
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
     
     Scaffold(
         topBar = {

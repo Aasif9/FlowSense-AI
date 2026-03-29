@@ -14,8 +14,8 @@ android {
         applicationId = "com.asif.flowsenseai"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -56,7 +56,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.3")
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     // Hilt dependencies
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-android-compiler:2.51.1")

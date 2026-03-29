@@ -19,12 +19,14 @@ import com.asif.flowsenseai.ui.theme.*
 @Composable
 fun TransactionItem(
     transaction: TransactionUiModel,
+    onClick: @Composable () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
+
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Icon

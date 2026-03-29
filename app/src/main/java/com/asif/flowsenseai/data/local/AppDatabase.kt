@@ -13,7 +13,7 @@ import androidx.room.RoomDatabase
  */
 @Database(
     entities = [ExpenseEntity::class], // List of entities in the database
-    version = 1, // Database version - increment when schema changes
+    version = 2, // Database version - increment when schema changes
     exportSchema = false // Set to true if you want to export schema
 )
 abstract class AppDatabase : RoomDatabase() {

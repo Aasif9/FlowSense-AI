@@ -20,5 +20,7 @@ data class ExpenseEntity(
     
     val date: Long = System.currentTimeMillis(), // Timestamp of when expense was made
     
-    val type: String = "debit" // Type of transaction (default is "debit")
+    val type: String = "debit" ,// Type of transaction (default is "debit")
+
+    val notes: String? = null // Optional notes about the expense
 )

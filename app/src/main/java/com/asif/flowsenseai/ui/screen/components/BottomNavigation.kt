@@ -19,7 +19,7 @@ private val navItems = listOf(
     NavItem("Dashboard", Icons.Outlined.Dashboard),
     NavItem("Transactions", Icons.Outlined.Receipt),
     NavItem("Budgets", Icons.Outlined.AccountBalance),
-    NavItem("Goals", Icons.Outlined.TrackChanges)
+    NavItem("Settings", Icons.Outlined.Settings)
 )
 
 @Composable
