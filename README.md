@@ -28,7 +28,7 @@ It captures transactions, categorizes them intelligently, and provides actionabl
 ### 🏠 Dashboard — Financial Snapshot
 
 <p align="center">
-  <img src="docs/images/homepage.jpeg" width="300"/><br/>
+  <img src="docs/images/ai_generated_budget_forecast_predictor.jpeg" width="300"/><br/>
   <em>Monthly summary with category-level spending insights</em>
 </p>
 
@@ -46,7 +46,7 @@ It captures transactions, categorizes them intelligently, and provides actionabl
 ### ➕ Add Transaction — Manual Control
 
 <p align="center">
-  <img src="docs/images/add-transaction.jpeg" width="300"/><br/>
+  <img src="docs/images/add_transaction.jpeg" width="300"/><br/>
   <em>Add or correct transactions with category, notes, and attachments</em>
 </p>
 
@@ -55,7 +55,7 @@ It captures transactions, categorizes them intelligently, and provides actionabl
 ### 📊 Budgets — AI Forecast & Alerts
 
 <p align="center">
-  <img src="docs/images/ai_generated_budget_forecast_predictor.jpeg" width="300"/><br/>
+  <img src="docs/images/homepage.jpeg" width="300"/><br/>
   <em>Overspending alerts and AI-generated financial forecasts</em>
 </p>
 
