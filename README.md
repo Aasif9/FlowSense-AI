@@ -1,61 +1,151 @@
-# FlowSenseAI
+# 📊 FlowSenseAI
 
-AI-powered personal finance manager for Android that automates transaction tracking and turns raw payment data into actionable insights.
+**AI-powered personal finance manager for Android** that automatically tracks transactions and turns raw payment data into meaningful financial insights.
 
-## What the app does
+---
 
-FlowSenseAI captures transactions from multiple payment sources, categorizes them, and surfaces insights through a simple mobile experience.
+## ✨ Overview
 
-- Android app built with **Kotlin + Jetpack Compose + MVVM**
-- Local persistence using **Room + Flow** for reactive updates
-- AI/ML-assisted categorization using **TensorFlow Lite**
-- Insight generation using **Gemini API**
+FlowSenseAI simplifies personal finance by combining **automation + AI intelligence** into a clean mobile experience.
 
-## App Workflow (based on current UI screens)
+It captures transactions, categorizes them intelligently, and provides actionable insights — all in real time.
 
-### 1) Dashboard: financial snapshot + category insights
-The dashboard gives a monthly summary (net balance, total spent, total income) and a category-level spending breakdown.
+---
 
-![Dashboard](docs/images/homepage.jpeg)
+## 🚀 Features
 
-### 2) Transactions: filtered timeline of money movement
-Transactions are grouped by date with quick filters (All/Debit/Credit/Auto), helping users audit income and expense flow quickly.
+* 📥 Automatic transaction capture (notifications + manual input)
+* 🧠 AI-powered categorization using TensorFlow Lite
+* 📊 Smart insights powered by Gemini API
+* 📈 Budget tracking with predictive forecasts
+* 🔄 Real-time UI updates using Kotlin Flow
+* 🔐 Secure and customizable user settings
 
-![Transactions](docs/images/transaction_list.jpeg)
+---
 
-### 3) Add Transaction: manual correction and control
-Users can add or adjust entries with type selection, category, date, proof attachment, and notes. This supports correction when auto-detection is incomplete.
+## 📱 App Screens
 
-![Add Transaction](docs/images/add-transaction.jpeg)
+### 🏠 Dashboard — Financial Snapshot
 
-### 4) Budgets: proactive alerts + forecasting
-Budget screen highlights overspending alerts and displays AI-guided forecast cards (for example, projected savings and financial health status).
+<p align="center">
+  <img src="docs/images/homepage.jpeg" width="300"/><br/>
+  <em>Monthly summary with category-level spending insights</em>
+</p>
 
-![Budgets](docs/images/ai_generated_budget_forecast_predictor.jpeg)
+---
 
-### 5) Settings: profile, security, export, and preferences
-Settings screen centralizes account linking, security toggle, dark mode, notifications, and export options.
+### 💳 Transactions — Money Timeline
 
-![Settings](docs/images/settings_page.jpeg)
+<p align="center">
+  <img src="docs/images/transaction_list.jpeg" width="300"/><br/>
+  <em>Track income and expenses with filters and grouped timeline</em>
+</p>
 
-## End-to-end data flow
+---
 
-1. App receives transaction signals (notifications / user input)
-2. Text parsing extracts amount, merchant, payment channel, and timestamp
-3. ML pipeline classifies category and normalizes merchant names
-4. Room persists transactions and Flow updates UI in real time
-5. Gemini module generates insight summaries and budget guidance
+### ➕ Add Transaction — Manual Control
 
+<p align="center">
+  <img src="docs/images/add-transaction.jpeg" width="300"/><br/>
+  <em>Add or correct transactions with category, notes, and attachments</em>
+</p>
 
-## Tech Stack
+---
 
-- **Mobile:** Kotlin, Jetpack Compose, Material 3, Navigation Compose
-- **Architecture:** MVVM, Repository Pattern, Hilt
-- **Storage:** Room, Kotlin Flow
-- **AI/ML:** TensorFlow Lite, Gemini API
-- **Background:** NotificationListenerService, WorkManager
+### 📊 Budgets — AI Forecast & Alerts
 
+<p align="center">
+  <img src="docs/images/ai_generated_budget_forecast_predictor.jpeg" width="300"/><br/>
+  <em>Overspending alerts and AI-generated financial forecasts</em>
+</p>
 
+---
 
+### ⚙️ Settings — Personalization & Security
 
+<p align="center">
+  <img src="docs/images/settings_page.jpeg" width="300"/><br/>
+  <em>Manage preferences, security, export, and integrations</em>
+</p>
 
+---
+
+## 🔄 App Workflow
+
+```text
+1. Capture transaction signals (notifications / manual input)
+2. Parse transaction details (amount, merchant, timestamp)
+3. Categorize using ML (TensorFlow Lite)
+4. Store locally using Room DB
+5. Update UI reactively with Kotlin Flow
+6. Generate insights using Gemini API
+```
+
+---
+
+## 🏗️ Tech Stack
+
+### 📱 Mobile
+
+* Kotlin
+* Jetpack Compose
+* Material 3
+* Navigation Compose
+
+### 🧩 Architecture
+
+* MVVM
+* Repository Pattern
+* Hilt (Dependency Injection)
+
+### 💾 Storage
+
+* Room Database
+* Kotlin Flow (Reactive streams)
+
+### 🤖 AI / ML
+
+* TensorFlow Lite (on-device categorization)
+* Gemini API (insight generation)
+
+### ⚙️ Background Processing
+
+* NotificationListenerService
+* WorkManager
+
+---
+
+## 🎯 Key Highlights
+
+* ⚡ Fully reactive UI with Flow
+* 📱 Modern Android architecture (Compose + MVVM)
+* 🧠 Hybrid AI system (on-device + cloud insights)
+* 🔍 Designed for real-world financial tracking use cases
+
+---
+
+## 📌 Future Improvements
+
+* Bank account integration (UPI / SMS parsing enhancements)
+* Cloud sync & multi-device support
+* Advanced analytics dashboard
+* Export to CSV / PDF reports
+* Personalized AI financial assistant
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## ⭐ Support
+
+If you like this project, consider giving it a star ⭐ — it helps a lot!
